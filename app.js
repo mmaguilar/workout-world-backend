@@ -256,6 +256,6 @@ async function getFavorites(req, res){
 	const response = workouts;
 	res.json(response);
 }
-app.get('/workout-webapp/favorites', getFavorites);
+app.get('/api/workout-webapp/favorites', getFavorites);
 
 module.exports = app;
