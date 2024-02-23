@@ -15,10 +15,10 @@ workoutCollection = database.collection("workouts");
 //require database connection 
 const connectDB = require("./db/connectDB");
 const User = require("./db/userModel");
+const auth = require("./auth");
 
 connectDB();
-
-
+	
 // body parser configuration
 app.use(jsonParser);
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,6 +27,14 @@ app.get("/", (request, response, next) => {
 	response.json({ message: "Hey! This is your server response!" });
 	next();
   });  
+
+//auth endpoint 
+async function authorizeUser(request, response){
+	response.json({
+		message: "You are authorized to access me."
+	})
+}
+app.get("/auth-endpoint", auth, authorizeUser);
 
 //login endpoint 
 async function loginUser(request, response){
@@ -76,7 +84,7 @@ async function loginUser(request, response){
 	});
 
 }
-app.post("/api/login", loginUser);
+app.post("/login", loginUser);
 
 //register endpoint
 async function registerUser(request, response){
@@ -114,7 +122,7 @@ async function registerUser(request, response){
       });
     });
 }
-app.post("/api/register", registerUser);
+app.post("/register", registerUser);
 
 //get all the workout information
 //localhost:3000/workouts
