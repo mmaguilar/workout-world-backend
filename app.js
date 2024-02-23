@@ -1,36 +1,126 @@
 const express = require("express");
 const app = express();
-const body = require("body-parser");
-const jsonParser = body.json();
 
-//connect to the cluster Mongodb
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
+//const jwt = require("jsonwebtoken");
+const jsonParser = bodyParser.json();
+
+const { MongoClient } = require('mongodb');
 const url = "mongodb+srv://Aguilar:Eleven11@cluster0.2q9f60t.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(url);
+database = client.db("workout-world");
+workoutCollection = database.collection("workouts");
 
-// body parser configuration
-app.use(body.json());
-app.use(body.urlencoded({ extended: true }));
+//require database connection 
+const connectDB = require("./db/connectDB");
+const User = require("./db/userModel");
 
-async function connectDB(){
-  await client.connect();
-  database = client.db("workout-world");
-  collection = database.collection("workouts");
-  
-}
-  
 connectDB();
 
+
+// body parser configuration
+app.use(jsonParser);
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.get("/", (request, response, next) => {
-  response.json({ message: "Hey! This is your server response!" });
-  next();
-});
+	response.json({ message: "Hey! This is your server response!" });
+	next();
+  });  
+
+//login endpoint 
+// async function loginUser(request, response){
+// 	User
+// 	.findOne({ email: request.body.email })
+// 	.then((user) => {
+// 		bcrypt.compare(request.body.password, user.password)
+// 		.then((passwordCheck) => {
+
+// 			//check if password matches
+// 			if(!passwordCheck){
+// 				return resposnse.status(400).send({
+// 					message: "Passwords do not match", 
+// 					error
+// 				})
+// 			}
+
+// 			//create JWT token
+// 			const token = jwt.sign(
+// 				{
+// 					userId: user._id,
+// 					userEmail: user.email
+// 				},
+// 				"RANDOM-TOKEN",
+// 				{ expiresIn: "24h"}
+// 			);
+
+// 			//return success response 
+// 			response.status(200).send({
+// 				message: "Login Successful",
+// 				email: user.email,
+// 				token
+// 			})
+// 		})
+// 		.catch((error) => {
+// 			response.status(400).send({
+// 				message: "Passwords do not match",
+// 				error
+// 			});
+// 		});
+// 	})
+// 	.catch((e) => {
+// 		response.status(404).send({
+// 			message: "Email not found",
+// 			e
+// 		});
+// 	});
+
+// }
+// app.post("/api/login", loginUser);
+
+//register endpoint
+async function registerUser(request, response){
+	bcrypt
+    .hash(request.body.password, 10)
+    .then((hashedPassword) => {
+      // create a new user instance and collect the data
+      const user = new User({
+        email: request.body.email,
+        password: hashedPassword,
+      });
+	  user.save()
+
+	  // return success if the new user is added to the database successfully
+	  .then((result) => {
+		response.status(201).send({
+		  message: "User Created Successfully",
+		  result,
+		});
+	  })
+	  // catch erroe if the new user wasn't added successfully to the database
+	  .catch((error) => {
+		response.status(500).send({
+		  message: "Error creating user",
+		  error,
+		});
+	  });
+
+    })
+    // catch error if the password hash isn't successful
+    .catch((e) => {
+      response.status(500).send({
+        message: "Password was not hashed successfully",
+        e,
+      });
+    });
+}
+app.post("/api/register", registerUser);
 
 //get all the workout information
 //localhost:3000/workouts
 async function getAllWorkouts(req, res){
 	const query = {};
-	let workoutCursor = await collection.find(query);
+	let workoutCursor = await workoutCollection.find(query);
 	let workouts = await workoutCursor.toArray();
 	console.log(workouts);
 
@@ -49,7 +139,7 @@ async function getWorkoutsByName(req, res){
 		_id: workoutName
 	}
 
-	let workoutCursor = await collection.find(query);
+	let workoutCursor = await workoutCollection.find(query);
 	let workouts = await workoutCursor.toArray();
 
 	const response = workouts;
@@ -57,7 +147,7 @@ async function getWorkoutsByName(req, res){
 	console.log(response);
 }
 
-app.get(`/workout-webapp/workout/:name`, getWorkoutsByName);
+app.get('/workout-webapp/workout/:name', getWorkoutsByName);
 
 //get workout information by all dropdown info
 //localhost:3000/search/all?type=strength&muscle=quadriceps&difficulty=intermediate
@@ -73,7 +163,7 @@ async function getWorkoutsByAll(req,res){
 			difficulty : workoutDifficulty
 		}
 
-		let workoutCursor = await collection.find(query);
+		let workoutCursor = await workoutCollection.find(query);
 		let workouts = await workoutCursor.toArray();
 
 		const response = workouts;
@@ -95,7 +185,7 @@ async function getWorkoutsByTypeAndMuscle(req, res){
 		muscle : workoutMuscle
 	}
 
-	let workoutCursor = await collection.find(query);
+	let workoutCursor = await workoutCollection.find(query);
 	let workouts = await workoutCursor.toArray();
 
 	const response = workouts;
@@ -118,7 +208,7 @@ async function getWorkoutsByTypeAndDifficulty(req, res){
 		difficulty : workoutDifficulty
 	}
 
-	let workoutCursor = await collection.find(query);
+	let workoutCursor = await workoutCollection.find(query);
 	let workouts = await workoutCursor.toArray();
 
 	const response = workouts;
@@ -141,7 +231,7 @@ async function getWorkoutsByMuscleAndDifficulty(req, res){
 		difficulty : workoutDifficulty
 	}
 
-	let workoutCursor = await collection.find(query);
+	let workoutCursor = await workoutCollection.find(query);
 	let workouts = await workoutCursor.toArray();
 
 	const response = workouts;
@@ -162,7 +252,7 @@ async function getWorkoutsByType(req, res){
 		type: workoutType
 	}
 
-	const workoutCursor = await collection.find(query);
+	const workoutCursor = await workoutCollection.find(query);
 	const workouts = await workoutCursor.toArray();
 
 	const response = workouts;
@@ -182,7 +272,7 @@ async function getWorkoutsByMuscle(req, res){
 		muscle: workoutMuscle
 	}
 
-	const workoutCursor = await collection.find(query);
+	const workoutCursor = await workoutCollection.find(query);
 	const workouts = await workoutCursor.toArray();
 
 	const response = workouts;
@@ -203,7 +293,7 @@ async function getWorkoutsByDifficulty(req, res){
 		difficulty: workoutDifficulty
 	}
 
-	const workoutCursor = await collection.find(query);
+	const workoutCursor = await workoutCollection.find(query);
 	const workouts = await workoutCursor.toArray();
 
 	const response = workouts;
@@ -230,7 +320,7 @@ async function updateFavorite(req, res){
 	};
 
 	console.log(filter);
-	const result = await collection.updateOne(filter, updateDocument);
+	const result = await workoutCollection.updateOne(filter, updateDocument);
 
 	//http request code 
 	const response = [
@@ -248,7 +338,7 @@ app.post('/workout-webapp/updatefavorite/:workoutId', jsonParser, updateFavorite
 //localhost:3000/favorites
 async function getFavorites(req, res){
 	//finds favorited workouts
-	let workoutCursor = await collection.find({
+	let workoutCursor = await workoutCollection.find({
 		favorite: true
   	}); 
 
