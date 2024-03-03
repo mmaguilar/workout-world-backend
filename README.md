@@ -6,7 +6,7 @@ With features like workout search, detailed workout listings, user interaction o
 MongoDB integration for efficient data storage. Workout World aims to provide users with a comprehensive fitness experience. 
 
 ## Features
-- #Navigation Menu: Easily navigate through different sections of the website using the intuitive navigation menu.
+- Navigation Menu: Easily navigate through different sections of the website using the intuitive navigation menu.
 - Search Bar: Quickly find specific workouts by entering keywords or workout types into the search bar.
 - Dropdown Filters: Refine your workout search with dropdown filters, allowing you to filter workouts by criteria such as workout type, muscle group, and difficulty level.
 - Saving Options: Save your favorite workouts for easy access later, allowing you to create personalized workout routines.
