@@ -13,6 +13,3 @@ MongoDB integration for efficient data storage. Workout World aims to provide us
 - Responsive Design: Ensure the website is optimized for viewing and usability across various devices, including desktops, tablets, and smartphones.
 - Workout Details: Access detailed information for each workout, including step-by-step instructions, equipement required, and difficulty level.
 
-## Installation
-
-
