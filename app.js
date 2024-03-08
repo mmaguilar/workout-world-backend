@@ -84,7 +84,7 @@ async function loginUser(request, response){
 	});
 
 }
-app.post("/login", loginUser);
+app.post("/api/login", loginUser);
 
 //register endpoint
 async function registerUser(request, response){
@@ -122,7 +122,7 @@ async function registerUser(request, response){
       });
     });
 }
-app.post("/register", registerUser);
+app.post("/api/register", registerUser);
 
 //get all the workout information
 //localhost:3000/workouts
